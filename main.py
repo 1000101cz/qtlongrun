@@ -28,7 +28,7 @@ class Main(QMainWindow):
 
         def on_failure(ex: Exception):
             logger.warning("Long running task failed!")
-            logger.exception(ex)
+            logger.debug(ex)
 
         @loruf(on_finish=on_finish, on_fail=on_failure, parent=self)
         def task(arg1, arg2, arg3, prog_sig: pyqtSignal, change_desc: pyqtSignal):

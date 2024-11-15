@@ -130,9 +130,9 @@ def loruf(on_finish: Optional[Callable] = None, on_fail: Optional[Callable] = No
                 thread.failed.connect(on_fail)  # Connect the signal to a slot
                 if window:
                     def kill_clicked():
-                        thread.failed.emit(RuntimeError("Terminated by user"))
                         thread.terminate()
                         thread.wait()
+                        thread.failed.emit(RuntimeError("Terminated by user"))
                         return
 
                     window_dialog = _LFRLoadingWindow(on_kill=kill_clicked, parent=parent, title=window_title, enable_kill=enable_kill)
