@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+
+[project]
+name = "qtlongrun"
+version = "0.0.1"
+description = "Functions for easier use of PyQt threads using decorators"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {file = "LICENSE.txt"}
+keywords = ["threading", "Python", "PyQt", "loading", "animation"]
+authors = [
+    {name = "Stepan Marousek"}
+]
+classifiers = [
+    "Development Status :: 1",
+    "Programming Language :: Python"
+]
+dynamic = ["dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[project.urls]
+repository = "https://github.com/1000101cz/qtlongrun"
+
+[tool.setuptools.packages]
+find = {}
+
+[options.packages.find]
