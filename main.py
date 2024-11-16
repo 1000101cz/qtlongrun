@@ -60,7 +60,7 @@ class Main(QMainWindow):
     @staticmethod
     def _en_dis_kill():
         qtlongrun_settings.default.enable_kill = not qtlongrun_settings.default.enable_kill
-        logger.info(f"Kill set to {qtlongrun_settings.default.enable_kill}")
+        logger.info(f"'enable_kill' set to {qtlongrun_settings.default.enable_kill}")
 
 
 if __name__ == '__main__':

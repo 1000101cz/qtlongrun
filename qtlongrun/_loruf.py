@@ -40,7 +40,7 @@ class _LFRLoadingWindow(QDialog, _loruf_dialog):
             if on_kill is not None:
                 logger.warning("on_kill function is provided, but enable_kill parameter is turned off!")
 
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
+        self.setWindowFlags(~Qt.WindowContextHelpButtonHint & Qt.FramelessWindowHint | Qt.Dialog)
         self.setFixedSize(self.sizeHint())
 
         self.progressBar.hide()
