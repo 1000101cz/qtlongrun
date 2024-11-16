@@ -7,10 +7,13 @@ from PyQt5 import uic
 from PyQt5.QtCore import QThread, pyqtSignal, QSize, Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QDialog
 
+from ._settings import qtlongrun_settings as qlrs
 from ._loading_animation import LoadingSpinner
 
 _ui_path = pl.Path(__file__).parent / '_loruf.ui'
 _loruf_dialog = uic.loadUiType(str(_ui_path))[0]
+
+USE_DEF = '_USE_DEFAULT_'
 
 
 class _LFRLoadingWindow(QDialog, _loruf_dialog):
@@ -97,9 +100,13 @@ class WorkerThread(QThread):
         self.finished.emit()
 
 
-def loruf(on_finish: Optional[Callable] = None, on_fail: Optional[Callable] = None, window: bool = True,
-          parent: Optional[QWidget] = None, window_title: str = 'Long Running Task', enable_kill: bool = True,
-          window_description: Optional[str] = 'Task is running'):
+def loruf(on_finish: Optional[Callable] = USE_DEF,
+          on_fail: Optional[Callable] = USE_DEF,
+          window: bool = USE_DEF,
+          parent: Optional[QWidget] = USE_DEF,
+          window_title: str = USE_DEF,
+          enable_kill: bool = USE_DEF,
+          window_description: Optional[str] = USE_DEF):
     """
     LOng-RUnning Function decorator
 
@@ -120,6 +127,14 @@ def loruf(on_finish: Optional[Callable] = None, on_fail: Optional[Callable] = No
     :return:
     """
 
+    on_finish = on_finish if (on_finish != USE_DEF) else qlrs.default.on_finish
+    on_fail = on_fail if (on_fail != USE_DEF) else qlrs.default.on_fail
+    window = window if (window != USE_DEF) else qlrs.default.window
+    parent = parent if (parent != USE_DEF) else qlrs.default.parent
+    window_title = window_title if (window_title != USE_DEF) else qlrs.default.window_title
+    enable_kill = enable_kill if (enable_kill != USE_DEF) else qlrs.default.enable_kill
+    window_description = window_description if (window_description != USE_DEF) else qlrs.default.window_description
+
     def decorator(func: Callable):
         def wrapper(*args, **kwargs):
             try:
@@ -135,7 +150,7 @@ def loruf(on_finish: Optional[Callable] = None, on_fail: Optional[Callable] = No
                         thread.failed.emit(RuntimeError("Terminated by user"))
                         return
 
-                    window_dialog = _LFRLoadingWindow(on_kill=kill_clicked, parent=parent, title=window_title, enable_kill=enable_kill)
+                    window_dialog = _LFRLoadingWindow(on_kill=kill_clicked, parent=parent, title=window_title, enable_kill=enable_kill, description=window_description)
 
                     thread.finished.connect(window_dialog.accept)
                     thread.failed.connect(window_dialog.accept)

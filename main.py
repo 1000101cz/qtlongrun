@@ -7,8 +7,7 @@ from loguru import logger
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget
 
-from qtlongrun import loruf
-
+from qtlongrun import loruf, qtlongrun_settings
 
 class Main(QMainWindow):
     def __init__(self):
@@ -19,6 +18,7 @@ class Main(QMainWindow):
         self.show()
 
         self.pushButton.clicked.connect(self.button_clicked)
+        self.pushButton_en_dis_kill.clicked.connect(self._en_dis_kill)
 
     def button_clicked(self):
         logger.info("start button clicked")
@@ -56,6 +56,11 @@ class Main(QMainWindow):
                 logger.debug(f"Loop 3 | arg1: {arg3} | Iteration: {i + 1}")
 
         task('First argument', arg3='Argument 3', arg2='2. argument')
+
+    @staticmethod
+    def _en_dis_kill():
+        qtlongrun_settings.default.enable_kill = not qtlongrun_settings.default.enable_kill
+        logger.info(f"Kill set to {qtlongrun_settings.default.enable_kill}")
 
 
 if __name__ == '__main__':
