@@ -5,7 +5,7 @@ from typing import Optional, Callable
 
 from PyQt5 import uic
 from PyQt5.QtCore import QThread, pyqtSignal, QSize, Qt
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QDialog
+from PyQt5.QtWidgets import QWidget, QDialog
 
 from ._settings import qtlongrun_settings as qlrs
 from ._loading_animation import LoadingSpinner

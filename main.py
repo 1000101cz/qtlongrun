@@ -5,7 +5,7 @@ from PyQt5.QtCore import pyqtSignal
 from loguru import logger
 
 from PyQt5 import uic
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget
+from PyQt5.QtWidgets import QApplication, QMainWindow
 
 from qtlongrun import loruf, qtlongrun_settings
 
