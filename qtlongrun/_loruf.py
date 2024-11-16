@@ -13,7 +13,7 @@ from ._loading_animation import LoadingSpinner
 _ui_path = pl.Path(__file__).parent / '_loruf.ui'
 _loruf_dialog = uic.loadUiType(str(_ui_path))[0]
 
-USE_DEF = '_USE_DEFAULT_'
+USE_DEF = '_*/USE_DEFAULT/_*'
 
 
 class _LFRLoadingWindow(QDialog, _loruf_dialog):
