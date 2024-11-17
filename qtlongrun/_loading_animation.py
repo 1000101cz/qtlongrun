@@ -1,4 +1,5 @@
 import math
+from typing import Optional
 from PyQt5.QtCore import QTimer, QPoint, Qt
 from PyQt5.QtGui import QPainter, QBrush, QColor, QPixmap
 from PyQt5.QtWidgets import QWidget
@@ -9,7 +10,16 @@ from ._settings.settings import SpinnerStyle
 USE_DEF = '_*/USE_DEFAULT/_*'
 
 
-def blend_colors(color1, color2, weight=0.5):
+def blend_colors(color1: QColor, color2: QColor, weight: float = 0.5) -> QColor:
+    """
+    Blend two QColors into one color by adjusting the weight between them
+
+    :param color1:      first color
+    :param color2:      second color
+    :param weight:      blending weight
+
+    :return:            blended color
+    """
     # Clamp weight between 0 and 1
     weight = max(0, min(1, weight))
 
@@ -28,7 +38,12 @@ def blend_colors(color1, color2, weight=0.5):
 
 
 class LoadingSpinner(QWidget):
-    def __init__(self, parent=USE_DEF, style=USE_DEF):
+    """ Animated dot-spinning animation used for Loading window by loruf decorator """
+    def __init__(self, parent: Optional[QWidget] = USE_DEF, style: SpinnerStyle = USE_DEF):
+        """
+        :param parent:      PyQt object to be used as LoadingSpinner parent
+        :param style:       graphic style settings for LoadingSpinner
+        """
         parent = parent if (parent != USE_DEF) else qtlongrun_settings.default.parent
         style = style if (style != USE_DEF) else qtlongrun_settings.default.spinner_style
 
