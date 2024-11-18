@@ -146,8 +146,14 @@ def loruf(on_finish: Optional[Callable] = USE_DEF,
                 fnc_args = args
                 fnc_kwargs = kwargs
                 thread = WorkerThread(func, fnc_args=fnc_args, fnc_kwargs=fnc_kwargs)
-                thread.finished.connect(on_finish)  # Connect the signal to a slot
-                thread.failed.connect(on_fail)  # Connect the signal to a slot
+
+                thread.finished.connect(on_finish)
+                thread.finished.connect(thread.quit)
+                thread.finished.connect(thread.deleteLater)
+                thread.failed.connect(on_fail)
+                thread.failed.connect(thread.quit)
+                thread.failed.connect(thread.deleteLater)
+
                 if window:
                     def kill_clicked():
                         thread.terminate()
