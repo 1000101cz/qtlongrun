@@ -54,6 +54,8 @@ class _DefParams:
                  window_title: str,
                  enable_kill: bool,
                  window_description: Optional[str],
+                 window_sheet: str,
+                 window_flags,
                  spinner_style: SpinnerStyle):
         self.on_finish = on_finish
         self.on_fail = on_fail
@@ -62,6 +64,8 @@ class _DefParams:
         self.window_title = window_title
         self.enable_kill = enable_kill
         self.window_description = window_description
+        self.window_sheet = window_sheet
+        self.window_flags = window_flags
         self.spinner_style = spinner_style
 
 
@@ -77,6 +81,8 @@ class QtLongRunSettings:
                  window_title: str,
                  enable_kill: bool,
                  window_description: Optional[str],
+                 window_sheet: str,
+                 window_flags,
                  spinner_style: SpinnerStyle
                  ):
 
@@ -87,5 +93,7 @@ class QtLongRunSettings:
                                   window_title=window_title,
                                   enable_kill=enable_kill,
                                   window_description=window_description,
+                                  window_sheet=window_sheet,
+                                  window_flags=window_flags,
                                   spinner_style=spinner_style)
         """ Default values used throughout the package """

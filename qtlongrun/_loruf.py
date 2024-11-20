@@ -19,11 +19,15 @@ USE_DEF = '_*/USE_DEFAULT/_*'
 
 
 class _LFRLoadingWindow(QDialog, _loruf_dialog):
-    def __init__(self, title, parent=None, on_kill: Optional[Callable] = None, enable_kill: bool = True, description: Optional[str] = None, style=None):
+    def __init__(self, title, parent=None, on_kill: Optional[Callable] = None, enable_kill: bool = True, description: Optional[str] = None, style=None, window_flags=None, window_sheet=None):
         super().__init__()
         QDialog.__init__(self, parent)
         if style is None:
             style = qlrs.default.spinner_style
+        if window_flags is None:
+            window_flags = qlrs.default.window_flags
+        if window_sheet is None:
+            window_sheet = qlrs.default.window_sheet
         self.spinner = LoadingSpinner(parent=parent, style=style)
         self.setupUi(self)
         self.setWindowTitle(title)
@@ -44,7 +48,8 @@ class _LFRLoadingWindow(QDialog, _loruf_dialog):
             if on_kill is not None:
                 logger.warning("on_kill function is provided, but enable_kill parameter is turned off!")
 
-        self.setWindowFlags(~Qt.WindowContextHelpButtonHint & Qt.FramelessWindowHint | Qt.Dialog)
+        self.setWindowFlags(window_flags)
+        self.setStyleSheet(window_sheet)
         self.setFixedSize(self.sizeHint())
 
         self.progressBar.hide()
@@ -111,6 +116,8 @@ def loruf(on_finish: Optional[Callable] = USE_DEF,
           window_title: str = USE_DEF,
           enable_kill: bool = USE_DEF,
           window_description: Optional[str] = USE_DEF,
+          window_flags = USE_DEF,
+          window_sheet: str = USE_DEF,
           spinner_style: Optional[SpinnerStyle] = USE_DEF,
           thrname: str = 'Unnamed thread'):
     """
@@ -129,6 +136,8 @@ def loruf(on_finish: Optional[Callable] = USE_DEF,
     :param window_title:        title of loading window
     :param enable_kill:         whether to allow user to terminate the task
     :param window_description:  initial description showed in the loading window
+    :param window_flags:        Qt flags to be set for loading window
+    :param window_sheet:        style sheet to be used for loading window
     :param spinner_style:       graphic style to be used for LoadingSpinner
     :param thrname:             thread name - for logging
     :return:
@@ -141,6 +150,8 @@ def loruf(on_finish: Optional[Callable] = USE_DEF,
     window_title = window_title if (window_title != USE_DEF) else qlrs.default.window_title
     enable_kill = enable_kill if (enable_kill != USE_DEF) else qlrs.default.enable_kill
     window_description = window_description if (window_description != USE_DEF) else qlrs.default.window_description
+    window_flags = window_flags if (window_flags != USE_DEF) else qlrs.default.window_flags
+    window_sheet = window_sheet if (window_sheet != USE_DEF) else qlrs.default.window_sheet
     spinner_style = spinner_style if (spinner_style != USE_DEF) else qlrs.default.spinner_style
 
     def decorator(func: Callable):
@@ -148,50 +159,53 @@ def loruf(on_finish: Optional[Callable] = USE_DEF,
             try:
                 fnc_args = args
                 fnc_kwargs = kwargs
-                thrvar = WorkerThread(func, fnc_args=fnc_args, fnc_kwargs=fnc_kwargs, parent=parent)
+                thread = WorkerThread(func, fnc_args=fnc_args, fnc_kwargs=fnc_kwargs, parent=parent)
 
                 def thr_finished(obj=None):
                     res = copy.deepcopy(obj)
-                    thrvar.quit()
-                    thrvar.deleteLater()
+                    thread.quit()
+                    thread.deleteLater()
                     if window:
                         if window_dialog.spinner.timer.isActive():
                             window_dialog.spinner.timer.stop()
                         window_dialog.spinner.destroy()
                         window_dialog.accept()
-                    thrvar.wait()
+                    thread.wait()
                     logger.info(f"Thread '{thrname}' dead for sure!")
                     on_finish(res)
 
                 def thr_failed(ex: Exception):
-                    thrvar.quit()
-                    thrvar.deleteLater()
+                    thread.quit()
+                    thread.deleteLater()
                     if window:
                         if window_dialog.spinner.timer.isActive():
                             window_dialog.spinner.timer.stop()
                         window_dialog.spinner.destroy()
                         window_dialog.accept()
-                    thrvar.wait()
+                    thread.wait()
                     logger.info(f"Thread '{thrname}' dead for sure!")
                     on_fail(ex)
 
-                thrvar.finished.connect(thr_finished)
-                thrvar.failed.connect(thr_failed)
+                thread.finished.connect(thr_finished)
+                thread.failed.connect(thr_failed)
 
                 if window:
                     def kill_clicked():
-                        thrvar.terminate()
-                        thrvar.wait()
-                        thrvar.failed.emit(RuntimeError(f"Thread '{thrname}' terminated by user"))
+                        thread.terminate()
+                        thread.wait()
+                        thread.failed.emit(RuntimeError(f"Thread '{thrname}' terminated by user"))
                         return
 
-                    window_dialog = _LFRLoadingWindow(on_kill=kill_clicked, parent=parent, title=window_title, enable_kill=enable_kill, description=window_description, style=spinner_style)
+                    window_dialog = _LFRLoadingWindow(on_kill=kill_clicked, parent=parent, title=window_title,
+                                                      enable_kill=enable_kill, description=window_description,
+                                                      style=spinner_style, window_flags=window_flags,
+                                                      window_sheet=window_sheet)
 
-                    thrvar.progress.connect(window_dialog.update_progress)
-                    thrvar.change_description.connect(window_dialog.change_description)
+                    thread.progress.connect(window_dialog.update_progress)
+                    thread.change_description.connect(window_dialog.change_description)
 
                 logger.info(f"Starting thread '{thrname}'")
-                thrvar.start()
+                thread.start()
 
                 if window:
                     window_dialog.exec_()

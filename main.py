@@ -23,14 +23,14 @@ class Main(QMainWindow):
     def button_clicked(self):
         logger.info("start button clicked")
 
-        def on_finish():
+        def on_finish(obj=None):
             logger.success("Long running task finished")
 
         def on_failure(ex: Exception):
             logger.warning("Long running task failed!")
             logger.debug(ex)
 
-        @loruf(on_finish=on_finish, on_fail=on_failure, parent=self)
+        @loruf(on_finish=on_finish, on_fail=on_failure, parent=self, window_sheet='')
         def task(arg1, arg2, arg3, prog_sig: pyqtSignal, change_desc: pyqtSignal):
             loop_lengths = (5, 5, 5)
 
