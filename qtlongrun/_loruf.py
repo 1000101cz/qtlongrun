@@ -112,7 +112,7 @@ def loruf(on_finish: Optional[Callable] = USE_DEF,
           enable_kill: bool = USE_DEF,
           window_description: Optional[str] = USE_DEF,
           spinner_style: Optional[SpinnerStyle] = USE_DEF,
-          thrname: str = 'THREAD NAME'):
+          thrname: str = 'Unnamed thread'):
     """
     LOng-RUnning Function decorator
 
@@ -130,6 +130,7 @@ def loruf(on_finish: Optional[Callable] = USE_DEF,
     :param enable_kill:         whether to allow user to terminate the task
     :param window_description:  initial description showed in the loading window
     :param spinner_style:       graphic style to be used for LoadingSpinner
+    :param thrname:             thread name - for logging
     :return:
     """
 
