@@ -1,3 +1,4 @@
+import copy
 import time
 import pathlib as pl
 from loguru import logger
@@ -19,7 +20,7 @@ USE_DEF = '_*/USE_DEFAULT/_*'
 
 class _LFRLoadingWindow(QDialog, _loruf_dialog):
     def __init__(self, title, parent=None, on_kill: Optional[Callable] = None, enable_kill: bool = True, description: Optional[str] = None, style=None):
-        super().__init__(parent)
+        super().__init__()
         QDialog.__init__(self, parent)
         if style is None:
             style = qlrs.default.spinner_style
@@ -84,23 +85,23 @@ class _LFRLoadingWindow(QDialog, _loruf_dialog):
 class WorkerThread(QThread):
     progress = pyqtSignal(int)
     change_description = pyqtSignal(str)
-    finished = pyqtSignal()
+    finished = pyqtSignal(object)
     failed = pyqtSignal(Exception)
 
-    def __init__(self, fnc, fnc_args=None, fnc_kwargs=None):
-        super().__init__()
+    def __init__(self, fnc, fnc_args=None, fnc_kwargs=None, parent=None):
+        super().__init__(parent=parent)
         self.fnc = fnc
         self.fnc_args = fnc_args
         self.fnc_kwargs = fnc_kwargs
 
     # Overriding the run method of QThread
-    def run(self) -> None:
+    def run(self):
         try:
-            self.fnc(*self.fnc_args, **self.fnc_kwargs, prog_sig=self.progress, change_desc=self.change_description)
+            output = self.fnc(*self.fnc_args, **self.fnc_kwargs, prog_sig=self.progress, change_desc=self.change_description)
         except Exception as e:
             self.failed.emit(e)
-            return
-        self.finished.emit()
+            return None
+        self.finished.emit(copy.deepcopy(output))
 
 
 def loruf(on_finish: Optional[Callable] = USE_DEF,
@@ -110,7 +111,8 @@ def loruf(on_finish: Optional[Callable] = USE_DEF,
           window_title: str = USE_DEF,
           enable_kill: bool = USE_DEF,
           window_description: Optional[str] = USE_DEF,
-          spinner_style: Optional[SpinnerStyle] = USE_DEF):
+          spinner_style: Optional[SpinnerStyle] = USE_DEF,
+          thrname: str = 'THREAD NAME'):
     """
     LOng-RUnning Function decorator
 
@@ -145,30 +147,50 @@ def loruf(on_finish: Optional[Callable] = USE_DEF,
             try:
                 fnc_args = args
                 fnc_kwargs = kwargs
-                thread = WorkerThread(func, fnc_args=fnc_args, fnc_kwargs=fnc_kwargs)
+                thrvar = WorkerThread(func, fnc_args=fnc_args, fnc_kwargs=fnc_kwargs, parent=parent)
 
-                thread.finished.connect(on_finish)
-                thread.finished.connect(thread.quit)
-                thread.finished.connect(thread.deleteLater)
-                thread.failed.connect(on_fail)
-                thread.failed.connect(thread.quit)
-                thread.failed.connect(thread.deleteLater)
+                def thr_finished(obj=None):
+                    res = copy.deepcopy(obj)
+                    thrvar.quit()
+                    thrvar.deleteLater()
+                    if window:
+                        if window_dialog.spinner.timer.isActive():
+                            window_dialog.spinner.timer.stop()
+                        window_dialog.spinner.destroy()
+                        window_dialog.accept()
+                    thrvar.wait()
+                    logger.info(f"Thread '{thrname}' dead for sure!")
+                    on_finish(res)
+
+                def thr_failed(ex: Exception):
+                    thrvar.quit()
+                    thrvar.deleteLater()
+                    if window:
+                        if window_dialog.spinner.timer.isActive():
+                            window_dialog.spinner.timer.stop()
+                        window_dialog.spinner.destroy()
+                        window_dialog.accept()
+                    thrvar.wait()
+                    logger.info(f"Thread '{thrname}' dead for sure!")
+                    on_fail(ex)
+
+                thrvar.finished.connect(thr_finished)
+                thrvar.failed.connect(thr_failed)
 
                 if window:
                     def kill_clicked():
-                        thread.terminate()
-                        thread.wait()
-                        thread.failed.emit(RuntimeError("Terminated by user"))
+                        thrvar.terminate()
+                        thrvar.wait()
+                        thrvar.failed.emit(RuntimeError(f"Thread '{thrname}' terminated by user"))
                         return
 
                     window_dialog = _LFRLoadingWindow(on_kill=kill_clicked, parent=parent, title=window_title, enable_kill=enable_kill, description=window_description, style=spinner_style)
 
-                    thread.finished.connect(window_dialog.accept)
-                    thread.failed.connect(window_dialog.accept)
-                    thread.progress.connect(window_dialog.update_progress)
-                    thread.change_description.connect(window_dialog.change_description)
+                    thrvar.progress.connect(window_dialog.update_progress)
+                    thrvar.change_description.connect(window_dialog.change_description)
 
-                thread.start()
+                logger.info(f"Starting thread '{thrname}'")
+                thrvar.start()
 
                 if window:
                     window_dialog.exec_()
