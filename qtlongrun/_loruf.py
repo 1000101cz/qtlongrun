@@ -1,5 +1,4 @@
 import copy
-import time
 import pathlib as pl
 from loguru import logger
 from typing import Optional, Callable, Any
@@ -19,7 +18,8 @@ USE_DEF = '_*/USE_DEFAULT/_*'
 
 
 class _LFRLoadingWindow(QDialog, _loruf_dialog):
-    def __init__(self, title, parent=None, on_kill: Optional[Callable] = None, enable_kill: bool = True, description: Optional[str] = None, style=None, window_flags=None, window_sheet=None):
+    def __init__(self, title, parent=None, on_kill: Optional[Callable] = None, enable_kill: bool = True,
+                 description: Optional[str] = None, style=None, window_flags=None, window_sheet=None):
         super().__init__()
         QDialog.__init__(self, parent)
         if style is None:
