@@ -11,8 +11,10 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 
 from qtlongrun import loruf, qtlongrun_settings, LoadingSpinner, SpinnerStyle
 
-myappid = '1000101cz.1000101cz.QTLONGRUNEXAMPLE'
-ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+from sys import platform
+if platform == 'win32':
+    myappid = '1000101cz.1000101cz.QTLONGRUNEXAMPLE'
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
 
 class Main(QMainWindow):
