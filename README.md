@@ -1,5 +1,7 @@
 # qtlongrun
 
+![Alt text](data/logo.png)
+
 Functions for easier use of PyQt threads using decorators.
 
 For example usage see `main.py` file

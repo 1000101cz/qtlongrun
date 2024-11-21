@@ -2,12 +2,17 @@ from time import sleep
 import pathlib as pl
 
 from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtGui import QIcon
 from loguru import logger
+import ctypes
 
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QMainWindow
 
 from qtlongrun import loruf, qtlongrun_settings, LoadingSpinner, SpinnerStyle
+
+myappid = '1000101cz.1000101cz.QTLONGRUNEXAMPLE'
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
 
 class Main(QMainWindow):
@@ -15,6 +20,9 @@ class Main(QMainWindow):
         super(Main, self).__init__()
         window_path = pl.Path(__file__).parent / 'data' / 'window.ui'
         uic.loadUi(window_path, self)
+        icon = QIcon(str(pl.Path(__file__).parent / 'data' / 'logo.png'))
+        self.setWindowIcon(icon)
+        self.setWindowTitle('Example PyQt Application')
 
         self.show()
 
@@ -62,6 +70,8 @@ class Main(QMainWindow):
 
     @staticmethod
     def _set_default_settings():
+        qtlongrun_settings.default.spinner_style.n_dots = 7
+        qtlongrun_settings.default.spinner_style.dot_radius = 14
         qtlongrun_settings.default.spinner_style.style = SpinnerStyle.image
 
     @staticmethod
