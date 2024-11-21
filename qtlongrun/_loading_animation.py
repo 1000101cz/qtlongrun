@@ -77,7 +77,7 @@ class LoadingSpinner(QWidget):
 
     def resizeEvent(self, event):
         """Update internal parameters when the widget is resized."""
-        self._dot_radius = min(self.width(), self.height()) / 9  # Adjust dot size relative to widget size
+        self._dot_radius = min(self.width(), self.height()) / 15  # Adjust dot size relative to widget size
         self.update()  # Trigger a repaint when resizing
         super().resizeEvent(event)
 

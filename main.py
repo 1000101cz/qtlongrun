@@ -73,8 +73,6 @@ class Main(QMainWindow):
 
     @staticmethod
     def _set_default_settings():
-        qtlongrun_settings.default.spinner_style.n_dots = 7
-        qtlongrun_settings.default.spinner_style.dot_radius = 14
         qtlongrun_settings.default.spinner_style.style = SpinnerStyle.image
 
     @staticmethod
