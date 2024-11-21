@@ -2,7 +2,7 @@ import copy
 import time
 import pathlib as pl
 from loguru import logger
-from typing import Optional, Callable
+from typing import Optional, Callable, Any
 
 from PyQt5 import uic
 from PyQt5.QtCore import QThread, pyqtSignal, QSize, Qt
@@ -86,7 +86,6 @@ class _LFRLoadingWindow(QDialog, _loruf_dialog):
         self.label_desc.setText(desc)
 
 
-
 class WorkerThread(QThread):
     progress = pyqtSignal(int)
     change_description = pyqtSignal(str)
@@ -102,11 +101,24 @@ class WorkerThread(QThread):
     # Overriding the run method of QThread
     def run(self):
         try:
-            output = self.fnc(*self.fnc_args, **self.fnc_kwargs, prog_sig=self.progress, change_desc=self.change_description)
+            output = self.fnc(*self.fnc_args, **self.fnc_kwargs,
+                              prog_sig=self.progress, change_desc=self.change_description)
         except Exception as e:
             self.failed.emit(e)
             return None
         self.finished.emit(copy.deepcopy(output))
+
+
+def _keep_or_other(value: Optional[Any], other: Optional[Any], def_macro: object = USE_DEF) -> Optional[Any]:
+    """
+    Return original value if it does not equal def_macro
+    Return other otherwise
+
+    :param value:       original value
+    :param other:       alternative value
+    :param def_macro:   default macro for not set value
+    """
+    return value if (value != def_macro) else other
 
 
 def loruf(on_finish: Optional[Callable] = USE_DEF,
@@ -116,7 +128,7 @@ def loruf(on_finish: Optional[Callable] = USE_DEF,
           window_title: str = USE_DEF,
           enable_kill: bool = USE_DEF,
           window_description: Optional[str] = USE_DEF,
-          window_flags = USE_DEF,
+          window_flags: Qt.WindowFlags = USE_DEF,
           window_sheet: str = USE_DEF,
           spinner_style: Optional[SpinnerStyle] = USE_DEF,
           thrname: str = 'Unnamed thread'):
@@ -143,16 +155,16 @@ def loruf(on_finish: Optional[Callable] = USE_DEF,
     :return:
     """
 
-    on_finish = on_finish if (on_finish != USE_DEF) else qlrs.default.on_finish
-    on_fail = on_fail if (on_fail != USE_DEF) else qlrs.default.on_fail
-    window = window if (window != USE_DEF) else qlrs.default.window
-    parent = parent if (parent != USE_DEF) else qlrs.default.parent
-    window_title = window_title if (window_title != USE_DEF) else qlrs.default.window_title
-    enable_kill = enable_kill if (enable_kill != USE_DEF) else qlrs.default.enable_kill
-    window_description = window_description if (window_description != USE_DEF) else qlrs.default.window_description
-    window_flags = window_flags if (window_flags != USE_DEF) else qlrs.default.window_flags
-    window_sheet = window_sheet if (window_sheet != USE_DEF) else qlrs.default.window_sheet
-    spinner_style = spinner_style if (spinner_style != USE_DEF) else qlrs.default.spinner_style
+    on_finish = _keep_or_other(on_finish, qlrs.default.on_finish)
+    on_fail = _keep_or_other(on_fail, qlrs.default.on_fail)
+    window = _keep_or_other(window, qlrs.default.window)
+    parent = _keep_or_other(parent, qlrs.default.parent)
+    window_title = _keep_or_other(window_title, qlrs.default.window_title)
+    enable_kill = _keep_or_other(enable_kill, qlrs.default.enable_kill)
+    window_description = _keep_or_other(window_description, qlrs.default.window_description)
+    window_flags = _keep_or_other(window_flags, qlrs.default.window_flags)
+    window_sheet = _keep_or_other(window_sheet, qlrs.default.window_sheet)
+    spinner_style = _keep_or_other(spinner_style, qlrs.default.spinner_style)
 
     def decorator(func: Callable):
         def wrapper(*args, **kwargs):
@@ -161,8 +173,7 @@ def loruf(on_finish: Optional[Callable] = USE_DEF,
                 fnc_kwargs = kwargs
                 thread = WorkerThread(func, fnc_args=fnc_args, fnc_kwargs=fnc_kwargs, parent=parent)
 
-                def thr_finished(obj=None):
-                    res = copy.deepcopy(obj)
+                def common_kill_thread():
                     thread.quit()
                     thread.deleteLater()
                     if window:
@@ -172,18 +183,14 @@ def loruf(on_finish: Optional[Callable] = USE_DEF,
                         window_dialog.accept()
                     thread.wait()
                     logger.info(f"Thread '{thrname}' dead for sure!")
+
+                def thr_finished(obj=None):
+                    res = copy.deepcopy(obj)
+                    common_kill_thread()
                     on_finish(res)
 
                 def thr_failed(ex: Exception):
-                    thread.quit()
-                    thread.deleteLater()
-                    if window:
-                        if window_dialog.spinner.timer.isActive():
-                            window_dialog.spinner.timer.stop()
-                        window_dialog.spinner.destroy()
-                        window_dialog.accept()
-                    thread.wait()
-                    logger.info(f"Thread '{thrname}' dead for sure!")
+                    common_kill_thread()
                     on_fail(ex)
 
                 thread.finished.connect(thr_finished)

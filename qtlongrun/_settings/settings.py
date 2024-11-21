@@ -2,6 +2,7 @@ import pathlib as pl
 from typing import Optional, Callable
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QWidget
+from PyQt5.QtCore import Qt
 
 
 class SpinnerStyle:
@@ -55,7 +56,7 @@ class _DefParams:
                  enable_kill: bool,
                  window_description: Optional[str],
                  window_sheet: str,
-                 window_flags,
+                 window_flags: Qt.WindowFlags,
                  spinner_style: SpinnerStyle):
         self.on_finish = on_finish
         self.on_fail = on_fail
@@ -67,7 +68,6 @@ class _DefParams:
         self.window_sheet = window_sheet
         self.window_flags = window_flags
         self.spinner_style = spinner_style
-
 
 
 class QtLongRunSettings:
@@ -82,7 +82,7 @@ class QtLongRunSettings:
                  enable_kill: bool,
                  window_description: Optional[str],
                  window_sheet: str,
-                 window_flags,
+                 window_flags: Qt.WindowFlags,
                  spinner_style: SpinnerStyle
                  ):
 

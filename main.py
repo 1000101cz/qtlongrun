@@ -9,12 +9,12 @@ import ctypes
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QMainWindow
 
-from qtlongrun import loruf, qtlongrun_settings, LoadingSpinner, SpinnerStyle
+from qtlongrun import loruf, qtlongrun_settings, SpinnerStyle
 
 from sys import platform
 if platform == 'win32':
-    myappid = '1000101cz.1000101cz.QTLONGRUNEXAMPLE'
-    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+    my_app_id = '1000101cz.1000101cz.QT_LONG_RUN_EXAMPLE'
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(my_app_id)
 
 
 class Main(QMainWindow):
@@ -37,6 +37,7 @@ class Main(QMainWindow):
         logger.info("start button clicked")
 
         def on_finish(obj=None):
+            logger.info(f"loruf output: {obj}")
             logger.success("Long running task finished")
 
         def on_failure(ex: Exception):

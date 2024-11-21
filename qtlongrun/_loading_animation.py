@@ -89,7 +89,7 @@ class LoadingSpinner(QWidget):
         radius = min(self.width(), self.height()) / 3  # Adjust radius relative to the widget size
 
         for i in range(self._num_dots):
-            radius_const = (i) / self._num_dots
+            radius_const = i / self._num_dots
 
             angle_rad = math.radians(self.angle + (360 / self._num_dots) * i)
             x = int(center.x() + radius * math.cos(angle_rad))
@@ -100,7 +100,8 @@ class LoadingSpinner(QWidget):
                 if self._style.style == SpinnerStyle.plain_fade:
                     color.setAlphaF((i + 1) / self._num_dots)
                 elif self._style.style == SpinnerStyle.plain_transition:
-                    color = blend_colors(color, self._style.sec_color, ((i + 1) / self._num_dots) * self._style.transition_weight)
+                    color = blend_colors(color1=color, color2=self._style.sec_color,
+                                         weight=((i + 1) / self._num_dots) * self._style.transition_weight)
                 painter.setBrush(QBrush(color))
             elif self._style.style == SpinnerStyle.image:
                 assert self.fill_image is not None, "fill_image is not defined"
