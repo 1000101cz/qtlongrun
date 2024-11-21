@@ -7,7 +7,8 @@ from loguru import logger
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QMainWindow
 
-from qtlongrun import loruf, qtlongrun_settings
+from qtlongrun import loruf, qtlongrun_settings, LoadingSpinner, SpinnerStyle
+
 
 class Main(QMainWindow):
     def __init__(self):
@@ -21,6 +22,8 @@ class Main(QMainWindow):
         self.pushButton_en_dis_kill.clicked.connect(self._en_dis_kill)
 
     def button_clicked(self):
+        self._set_default_settings()
+
         logger.info("start button clicked")
 
         def on_finish(obj=None):
@@ -30,7 +33,7 @@ class Main(QMainWindow):
             logger.warning("Long running task failed!")
             logger.debug(ex)
 
-        @loruf(on_finish=on_finish, on_fail=on_failure, parent=self, window_sheet='')
+        @loruf(on_finish=on_finish, on_fail=on_failure, parent=self)
         def task(arg1, arg2, arg3, prog_sig: pyqtSignal, change_desc: pyqtSignal):
             loop_lengths = (5, 5, 5)
 
@@ -56,6 +59,10 @@ class Main(QMainWindow):
                 logger.debug(f"Loop 3 | arg1: {arg3} | Iteration: {i + 1}")
 
         task('First argument', arg3='Argument 3', arg2='2. argument')
+
+    @staticmethod
+    def _set_default_settings():
+        qtlongrun_settings.default.spinner_style.style = SpinnerStyle.image
 
     @staticmethod
     def _en_dis_kill():

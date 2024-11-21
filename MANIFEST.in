@@ -1,1 +1,2 @@
 include qtlongrun/*.ui
+include qtlongrun/_data/*.png
