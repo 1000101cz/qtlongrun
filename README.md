@@ -26,7 +26,11 @@ def on_failure(ex: Exception):
 # parent - PyQt parent object for the loading window
 # window_title - title to be used for the loading window
 # enable_kill - whether to let user kill the thread while it is running by clicking on a kill button
-# window description - initial description showed in the loading window
+# window_description - initial description showed in the loading window
+# window_flags - PyQt flags to be set for loading window
+# window_sheet - style sheet to be used for loading window
+# spinner_style - Graphic style to be used for LoadingSpinner (instance of SpinnerStyle class)
+# thrname - thread name to be used for logs
 @loruf(on_finish=on_finish, on_fail=on_failure, window=True, parent=None, window_title='Loading Window', 
        enable_kill=True, window_description='Performing crucial operations')
 def task(arg1, arg2, arg3, prog_sig: pyqtSignal, change_desc: pyqtSignal):
