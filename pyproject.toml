@@ -6,10 +6,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "qtlongrun"
-version = "0.1.5"
+version = "0.1.6"
 description = "Functions for easier use of PyQt threads using decorators"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 license = {file = "LICENSE.txt"}
 keywords = ["threading", "Python", "PyQt", "loading", "animation"]
 authors = [
