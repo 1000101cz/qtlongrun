@@ -3,7 +3,6 @@ import pathlib as pl
 
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QIcon
-from loguru import logger
 import ctypes
 
 from PyQt5 import uic
@@ -34,15 +33,15 @@ class Main(QMainWindow):
     def button_clicked(self):
         self._set_default_settings()
 
-        logger.info("start button clicked")
+        print("qtlongrun info: start button clicked")
 
         def on_finish(obj=None):
-            logger.info(f"loruf output: {obj}")
-            logger.success("Long running task finished")
+            print(f"qtlongrun info: loruf output: {obj}")
+            print("qtlongrun success: Long running task finished")
 
         def on_failure(ex: Exception):
-            logger.warning("Long running task failed!")
-            logger.debug(ex)
+            print("qtlongrun warning: Long running task failed!")
+            print(f"qtlongrun debug: {ex}")
 
         @loruf(on_finish=on_finish, on_fail=on_failure, parent=self)
         def task(arg1, arg2, arg3, prog_sig: pyqtSignal, change_desc: pyqtSignal):
@@ -53,21 +52,21 @@ class Main(QMainWindow):
                 sleep(0.5)
                 progress = int(100 * ((i + 1) / sum(loop_lengths)))
                 prog_sig.emit(progress)
-                logger.debug(f"Loop 1 | arg1: {arg1} | Iteration: {i + 1}")
+                print(f"qtlongrun debug: Loop 1 | arg1: {arg1} | Iteration: {i + 1}")
 
             change_desc.emit("Executing for loop 2")
             for i in range(loop_lengths[1]):
                 sleep(1)
                 progress = int(100 * ((i + 1 + loop_lengths[0]) / sum(loop_lengths)))
                 prog_sig.emit(progress)
-                logger.debug(f"Loop 2 | arg1: {arg2} | Iteration: {i + 1}")
+                print(f"qtlongrun debug: Loop 2 | arg1: {arg2} | Iteration: {i + 1}")
 
             change_desc.emit("Executing for loop 3")
             for i in range(loop_lengths[1]):
                 sleep(1.5)
                 progress = int(100 * ((i + 1 + loop_lengths[0] + loop_lengths[1]) / sum(loop_lengths)))
                 prog_sig.emit(progress)
-                logger.debug(f"Loop 3 | arg1: {arg3} | Iteration: {i + 1}")
+                print(f"qtlongrun debug: Loop 3 | arg1: {arg3} | Iteration: {i + 1}")
 
         task('First argument', arg3='Argument 3', arg2='2. argument')
 
@@ -78,7 +77,7 @@ class Main(QMainWindow):
     @staticmethod
     def _en_dis_kill():
         qtlongrun_settings.default.enable_kill = not qtlongrun_settings.default.enable_kill
-        logger.info(f"'enable_kill' set to {qtlongrun_settings.default.enable_kill}")
+        print(f"qtlongrun info: 'enable_kill' set to {qtlongrun_settings.default.enable_kill}")
 
 
 if __name__ == '__main__':

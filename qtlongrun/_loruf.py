@@ -1,6 +1,5 @@
 import copy
 import pathlib as pl
-from loguru import logger
 from typing import Optional, Callable, Any
 
 from PyQt5 import uic
@@ -41,12 +40,12 @@ class _LFRLoadingWindow(QDialog, _loruf_dialog):
             if on_kill is not None:
                 self.pushButton_kill.clicked.connect(on_kill)
             else:
-                logger.warning("enable_kill parameter is turned on, but no on_kill function is provided!")
+                print("qtlongrun warning: enable_kill parameter is turned on, but no on_kill function is provided!")
                 self.widget_kill.hide()
         else:
             self.widget_kill.hide()
             if on_kill is not None:
-                logger.warning("on_kill function is provided, but enable_kill parameter is turned off!")
+                print("qtlongrun warning: on_kill function is provided, but enable_kill parameter is turned off!")
 
         self.setWindowFlags(window_flags)
         self.setStyleSheet(window_sheet)
@@ -182,7 +181,7 @@ def loruf(on_finish: Optional[Callable] = USE_DEF,
                         window_dialog.spinner.destroy()
                         window_dialog.accept()
                     thread.wait()
-                    logger.info(f"Thread '{thrname}' dead for sure!")
+                    print(f"qtlongrun info: Thread '{thrname}' dead for sure!")
 
                 def thr_finished(obj=None):
                     res = copy.deepcopy(obj)
@@ -211,12 +210,12 @@ def loruf(on_finish: Optional[Callable] = USE_DEF,
                     thread.progress.connect(window_dialog.update_progress)
                     thread.change_description.connect(window_dialog.change_description)
 
-                logger.info(f"Starting thread '{thrname}'")
+                print(f"qtlongrun exception: Starting thread '{thrname}'")
                 thread.start()
 
                 if window:
                     window_dialog.exec_()
             except Exception as e:
-                logger.exception(e)
+                print(f"qtlongrun exception: {e}")
         return wrapper
     return decorator
